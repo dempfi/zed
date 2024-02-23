@@ -78,7 +78,7 @@ struct AvailableLanguage {
 
 enum AvailableGrammar {
     Native(tree_sitter::Language),
-    Loaded(PathBuf, tree_sitter::Language),
+    Loaded((), tree_sitter::Language),
     Loading(PathBuf, Vec<oneshot::Sender<Result<tree_sitter::Language>>>),
     Unloaded(PathBuf),
 }
@@ -460,11 +460,11 @@ impl LanguageRegistry {
                                         grammar
                                     })?;
 
-                                    if let Some(AvailableGrammar::Loading(_, txs)) =
-                                        this.state.write().grammars.insert(
-                                            name,
-                                            AvailableGrammar::Loaded(wasm_path, grammar.clone()),
-                                        )
+                                    if let Some(AvailableGrammar::Loading(_, txs)) = this
+                                        .state
+                                        .write()
+                                        .grammars
+                                        .insert(name, AvailableGrammar::Loaded((), grammar.clone()))
                                     {
                                         for tx in txs {
                                             tx.send(Ok(grammar.clone())).ok();
